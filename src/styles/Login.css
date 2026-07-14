@@ -82,6 +82,51 @@
   border: 1px solid #60a5fa;
 }
 
+/* PASSWORD FIELD — wraps the password input so the eye icon can be
+   positioned inside it, on the right edge. */
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-field input {
+  /* extra right padding so typed text never runs under the icon */
+  padding-right: 46px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+
+  color: rgba(255,255,255,0.65);
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.password-toggle:hover {
+  color: #60a5fa;
+  background: rgba(255,255,255,0.08);
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
 .primary-btn {
   width: 100%;
   padding: 14px;

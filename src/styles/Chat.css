@@ -2,16 +2,27 @@
   box-sizing: border-box;
 }
 
-/* MAIN LAYOUT */
-.chat-container {
+/* APP SHELL — wraps the topbar + everything below it. The gradient
+   background lives here now (moved off .chat-container) so it still
+   covers the full page even though the topbar is a separate full-width
+   row above .chat-container. */
+.app-shell {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   background:
     radial-gradient(circle at top left, #1e3a8a, transparent 40%),
     radial-gradient(circle at bottom right, #0f766e, transparent 40%),
     #0b1120;
-
   color: white;
+  overflow: hidden;
+}
+
+/* MAIN LAYOUT (everything below the topbar) */
+.chat-container {
+  display: flex;
+  flex: 1;
+  min-height: 0; /* allow children to scroll instead of overflowing the flex row */
   overflow: hidden;
 }
 
@@ -39,33 +50,30 @@
   overflow: hidden;
 }
 
-/* NEW CHAT BUTTON */
 .new-chat {
   width: 100%;
-
   padding: 14px;
 
-  border: none;
-  border-radius: 14px;
+  background: linear-gradient(135deg, #6b81f1, #0d1694);
 
-  background: linear-gradient(
-    135deg,
-    #3b82f6,
-    #2563eb
-  );
+  border: none;
+  border-radius: 12px;
 
   color: white;
-  font-weight: 600;
   font-size: 15px;
+  font-weight: 600;
 
   cursor: pointer;
 
-  transition: 0.3s;
+  transition: 0.3s ease;
+
+  box-shadow: 0 4px 15px rgba(20,184,166,0.35);
 }
 
 .new-chat:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59,130,246,0.35);
+
+  box-shadow: 0 8px 25px rgba(20,184,166,0.5);
 }
 
 /* CHAT LIST */
@@ -99,8 +107,7 @@
 .chat-item.active {
   background: linear-gradient(
     135deg,
-    #2563eb,
-    #3b82f6
+    #6b81f1, #0d1694
   );
 
   box-shadow: 0 4px 15px rgba(37,99,235,0.4);
@@ -136,15 +143,23 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-/* TOPBAR */
+/* TOPBAR — now a full-width bar living directly inside .app-shell,
+   above .chat-container. It's a strict 3-column layout: two side
+   columns of EQUAL flex weight (.topbar-side) and a center column
+   (.topbar-center) that holds the tabs. Because both side columns
+   always take up equal space — even when the hamburger button isn't
+   rendered on the planner view — the center tabs stay visually
+   centered on the full page at all times, regardless of the sidebar
+   being open, closed, or unmounted. */
 .topbar {
   height: 70px;
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
 
   padding: 0 20px;
 
@@ -154,6 +169,23 @@
   -webkit-backdrop-filter: blur(20px);
 
   border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.topbar-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.topbar-side-right {
+  justify-content: flex-end;
+}
+
+.topbar-center {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
 /* SIDEBAR BUTTON */
@@ -186,26 +218,6 @@
 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-/* LOGOUT */
-.topbar button:last-child {
-  border: none;
-
-  padding: 10px 18px;
-
-  border-radius: 10px;
-
-  background: #ef4444;
-  color: white;
-
-  cursor: pointer;
-
-  transition: 0.3s;
-}
-
-.topbar button:last-child:hover {
-  background: #dc2626;
 }
 
 /* MESSAGE AREA */
@@ -390,4 +402,40 @@
 
 .chat-image:hover {
   transform: scale(1.03);
+}
+
+.view-tabs {
+display: flex;
+gap: 4px;
+background: #151b26;
+border: 1px solid #263041;
+border-radius: 10px;
+padding: 3px;
+}
+
+.view-tab {
+background: transparent;
+border: none;
+color: #9aa5b6;
+padding: 7px 16px;
+border-radius: 8px;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+white-space: nowrap;
+}
+
+.view-tab:hover {
+color: #e5e9f0;
+}
+
+.view-tab-active {
+background: linear-gradient(135deg, #2563eb, #22d3ee);
+color: #0b1120;
+font-weight: 700;
+box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+}
+
+.view-tab-active:hover {
+color: #0b1120;
 }

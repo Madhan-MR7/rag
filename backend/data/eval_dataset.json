@@ -1,0 +1,994 @@
+{
+  "dataset_name": "FitGPT RAG Evaluation Dataset \u2014 BodyCraft Exercise Guide",
+  "description": "Ground-truth Q&A pairs built directly from the BodyCraft Exercise Guide PDF. Covers all 7 sections: Chest (14 exercises), Shoulders (11), Back (7), Arms (9), Core (4), Legs (8), Sports Specific (3). Total 51 test cases.",
+  "version": "2.0",
+  "pdf_source": "BodyCraft Exercise Guide",
+  "total_test_cases": 51,
+  "query_type_breakdown": {
+    "single_howto": "How to perform a single exercise",
+    "single_what": "What is this exercise",
+    "single_explain": "Explain this exercise in detail",
+    "muscle_question": "What muscles does X work",
+    "variation_question": "What are the variations of X",
+    "equipment_question": "What equipment is needed for X",
+    "list_query": "List multiple exercises for a muscle group",
+    "multi_muscle_query": "Give exercises for multiple muscle groups",
+    "negative_test": "Query for something not in the PDF"
+  },
+  "samples": [
+    {
+      "id": "EVL-001",
+      "query": "How do I do a bench press?",
+      "query_type": "single_howto",
+      "muscle_group": "chest",
+      "expected_exercise": "Bench Press",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids",
+        "Triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "chest",
+        "bench",
+        "overhand grip",
+        "press",
+        "elbows"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-002",
+      "query": "What is a Cable Bench Press?",
+      "query_type": "single_what",
+      "muscle_group": "chest",
+      "expected_exercise": "Cable Bench Press",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids",
+        "Triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "cable",
+        "chest",
+        "functional training arms",
+        "overhand"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-003",
+      "query": "Explain the Converging Bench Press exercise",
+      "query_type": "single_explain",
+      "muscle_group": "chest",
+      "expected_exercise": "Converging Bench Press",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids",
+        "Triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "converge",
+        "middle",
+        "chest",
+        "cable"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-004",
+      "query": "How to do an Incline Bench Press?",
+      "query_type": "single_howto",
+      "muscle_group": "chest",
+      "expected_exercise": "Incline Bench Press",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids",
+        "Triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "incline",
+        "chest",
+        "seat back",
+        "overhand grip"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-005",
+      "query": "What muscles does a Cable Pec Fly work?",
+      "query_type": "muscle_question",
+      "muscle_group": "chest",
+      "expected_exercise": "Cable Pec Fly",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids"
+      ],
+      "expected_keywords_in_answer": [
+        "pectorals",
+        "chest",
+        "deltoids",
+        "shoulder"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-006",
+      "query": "List all chest exercises",
+      "query_type": "list_query",
+      "muscle_group": "chest",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "chest",
+        "pectorals"
+      ],
+      "expected_keywords_in_answer": [
+        "bench press",
+        "cable",
+        "fly",
+        "incline",
+        "decline",
+        "chest"
+      ],
+      "expected_min_results": 5
+    },
+    {
+      "id": "EVL-007",
+      "query": "What is the Self Stabilizing Chest Press?",
+      "query_type": "single_what",
+      "muscle_group": "chest",
+      "expected_exercise": "Self Stabilizing Chest Press",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids",
+        "Triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "core",
+        "stabilizing",
+        "back support",
+        "chest",
+        "lower weight"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-008",
+      "query": "How to do a Cable Incline Fly?",
+      "query_type": "single_howto",
+      "muscle_group": "chest",
+      "expected_exercise": "Cable Incline Fly",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids"
+      ],
+      "expected_keywords_in_answer": [
+        "incline",
+        "fly",
+        "chest",
+        "circular motion",
+        "upward"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-009",
+      "query": "What is a Cable Low Fly?",
+      "query_type": "single_what",
+      "muscle_group": "chest",
+      "expected_exercise": "Cable Low Fly",
+      "expected_primary_muscles": [
+        "Pectorals Major",
+        "Pectorals Minor",
+        "Anterior Deltoids",
+        "Triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "low",
+        "fly",
+        "chest",
+        "arms up",
+        "chest height"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-010",
+      "query": "How do I do a shoulder press?",
+      "query_type": "single_howto",
+      "muscle_group": "shoulders",
+      "expected_exercise": "Shoulder Press",
+      "expected_primary_muscles": [
+        "Deltoids",
+        "Triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "shoulder",
+        "deltoid",
+        "overhead",
+        "press",
+        "elbows"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-011",
+      "query": "What is a Cable Lateral Raise?",
+      "query_type": "single_what",
+      "muscle_group": "shoulders",
+      "expected_exercise": "Cable Lateral Raise",
+      "expected_primary_muscles": [
+        "Deltoids"
+      ],
+      "expected_keywords_in_answer": [
+        "lateral",
+        "raise",
+        "deltoids",
+        "shoulder",
+        "outward"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-012",
+      "query": "What muscles does an Upright Row work?",
+      "query_type": "muscle_question",
+      "muscle_group": "shoulders",
+      "expected_exercise": "Upright Row",
+      "expected_primary_muscles": [
+        "Deltoids",
+        "Trapezius"
+      ],
+      "expected_keywords_in_answer": [
+        "deltoids",
+        "trapezius",
+        "shoulder",
+        "upper back"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-013",
+      "query": "How do I do Shrugs?",
+      "query_type": "single_howto",
+      "muscle_group": "shoulders",
+      "expected_exercise": "Shrugs",
+      "expected_primary_muscles": [
+        "Trapezius",
+        "Deltoids"
+      ],
+      "expected_keywords_in_answer": [
+        "shrug",
+        "trapezius",
+        "shoulder",
+        "rearward",
+        "upward"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-014",
+      "query": "Explain the External Rotator exercise",
+      "query_type": "single_explain",
+      "muscle_group": "shoulders",
+      "expected_exercise": "External Rotator",
+      "expected_primary_muscles": [
+        "Rear Deltoids",
+        "Rotator Cuff"
+      ],
+      "expected_keywords_in_answer": [
+        "rotator cuff",
+        "rear deltoid",
+        "rotate",
+        "elbow height",
+        "door"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-015",
+      "query": "What is the Internal Rotator exercise?",
+      "query_type": "single_what",
+      "muscle_group": "shoulders",
+      "expected_exercise": "Internal Rotator",
+      "expected_primary_muscles": [
+        "Deltoids",
+        "Rotator Cuff"
+      ],
+      "expected_keywords_in_answer": [
+        "rotator cuff",
+        "deltoid",
+        "rotate",
+        "closing door",
+        "midsection"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-016",
+      "query": "Show me shoulder workouts",
+      "query_type": "list_query",
+      "muscle_group": "shoulders",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "deltoids",
+        "trapezius"
+      ],
+      "expected_keywords_in_answer": [
+        "shoulder",
+        "press",
+        "lateral",
+        "raise",
+        "deltoid"
+      ],
+      "expected_min_results": 4
+    },
+    {
+      "id": "EVL-017",
+      "query": "How do I do a Lat Pull Down?",
+      "query_type": "single_howto",
+      "muscle_group": "back",
+      "expected_exercise": "Lat Pull Down",
+      "expected_primary_muscles": [
+        "Latissimus Dorsi",
+        "Rhomboideus",
+        "Trapezius",
+        "Biceps"
+      ],
+      "expected_keywords_in_answer": [
+        "lat",
+        "pull",
+        "back",
+        "overhand",
+        "knee",
+        "chest"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-018",
+      "query": "What is a Low Cable Row?",
+      "query_type": "single_what",
+      "muscle_group": "back",
+      "expected_exercise": "Low Cable Row",
+      "expected_primary_muscles": [
+        "Latissimus Dorsi",
+        "Rhomboideus",
+        "Trapezius",
+        "Rear Deltoids",
+        "Biceps"
+      ],
+      "expected_keywords_in_answer": [
+        "row",
+        "back",
+        "midsection",
+        "shoulder blades",
+        "floor"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-019",
+      "query": "How to perform a One Arm Row?",
+      "query_type": "single_howto",
+      "muscle_group": "back",
+      "expected_exercise": "One Arm Row",
+      "expected_primary_muscles": [
+        "Latissimus Dorsi",
+        "Rhomboideus",
+        "Trapezius",
+        "Biceps"
+      ],
+      "expected_keywords_in_answer": [
+        "one arm",
+        "row",
+        "neutral grip",
+        "midsection",
+        "waist"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-020",
+      "query": "What muscles does a Mid Row work?",
+      "query_type": "muscle_question",
+      "muscle_group": "back",
+      "expected_exercise": "Mid Row",
+      "expected_primary_muscles": [
+        "Latissimus Dorsi",
+        "Rhomboideus",
+        "Trapezius",
+        "Rear Deltoids",
+        "Biceps"
+      ],
+      "expected_keywords_in_answer": [
+        "latissimus dorsi",
+        "rhomboideus",
+        "trapezius",
+        "back",
+        "biceps"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-021",
+      "query": "What is the Front Lat Pullover?",
+      "query_type": "single_what",
+      "muscle_group": "back",
+      "expected_exercise": "Front Lat Pullover",
+      "expected_primary_muscles": [
+        "Latissimus Dorsi",
+        "Rhomboideus",
+        "Trapezius",
+        "Biceps"
+      ],
+      "expected_keywords_in_answer": [
+        "lat pullover",
+        "high pulley",
+        "arms straight",
+        "pull down",
+        "chain"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-022",
+      "query": "List back exercises",
+      "query_type": "list_query",
+      "muscle_group": "back",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "lats",
+        "back",
+        "trapezius"
+      ],
+      "expected_keywords_in_answer": [
+        "lat pull",
+        "row",
+        "back",
+        "latissimus"
+      ],
+      "expected_min_results": 4
+    },
+    {
+      "id": "EVL-023",
+      "query": "How do I do a Triceps Pushdown?",
+      "query_type": "single_howto",
+      "muscle_group": "arms",
+      "expected_exercise": "Triceps Pushdown",
+      "expected_primary_muscles": [
+        "Triceps",
+        "Brachioradials"
+      ],
+      "expected_keywords_in_answer": [
+        "triceps",
+        "pushdown",
+        "high pulley",
+        "elbows",
+        "downward"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-024",
+      "query": "What is a Cable Arm Curl?",
+      "query_type": "single_what",
+      "muscle_group": "arms",
+      "expected_exercise": "Cable Arm Curl",
+      "expected_primary_muscles": [
+        "Biceps",
+        "Brachioradials"
+      ],
+      "expected_keywords_in_answer": [
+        "biceps",
+        "curl",
+        "underhand grip",
+        "elbows",
+        "forearms"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-025",
+      "query": "How to do a Triceps Kickback?",
+      "query_type": "single_howto",
+      "muscle_group": "arms",
+      "expected_exercise": "Triceps Kickback",
+      "expected_primary_muscles": [
+        "Triceps",
+        "Brachioradials"
+      ],
+      "expected_keywords_in_answer": [
+        "triceps",
+        "kickback",
+        "elbow",
+        "bend at waist",
+        "neutral grip"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-026",
+      "query": "What muscles does Overhead Biceps Curl work?",
+      "query_type": "muscle_question",
+      "muscle_group": "arms",
+      "expected_exercise": "Overhead Biceps Curl",
+      "expected_primary_muscles": [
+        "Biceps",
+        "Brachioradials"
+      ],
+      "expected_keywords_in_answer": [
+        "biceps",
+        "brachioradials",
+        "forearms",
+        "front of arm"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-027",
+      "query": "How to do Triceps Extension?",
+      "query_type": "single_howto",
+      "muscle_group": "arms",
+      "expected_exercise": "Triceps Extension",
+      "expected_primary_muscles": [
+        "Triceps",
+        "Brachioradials"
+      ],
+      "expected_keywords_in_answer": [
+        "triceps",
+        "extension",
+        "mid pulley",
+        "horizontal",
+        "elbow"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-028",
+      "query": "Show me arm exercises",
+      "query_type": "list_query",
+      "muscle_group": "arms",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "biceps",
+        "triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "biceps",
+        "triceps",
+        "curl",
+        "extension",
+        "arm"
+      ],
+      "expected_min_results": 4
+    },
+    {
+      "id": "EVL-029",
+      "query": "How do I do an Ab Crunch?",
+      "query_type": "single_howto",
+      "muscle_group": "core",
+      "expected_exercise": "Ab Crunch",
+      "expected_primary_muscles": [
+        "Abdominals"
+      ],
+      "expected_keywords_in_answer": [
+        "ab",
+        "crunch",
+        "abdominals",
+        "stomach",
+        "forward"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-030",
+      "query": "What is an Oblique Twist?",
+      "query_type": "single_what",
+      "muscle_group": "core",
+      "expected_exercise": "Oblique Twist",
+      "expected_primary_muscles": [
+        "Obliques",
+        "Abdominals"
+      ],
+      "expected_keywords_in_answer": [
+        "oblique",
+        "twist",
+        "waist",
+        "hips",
+        "torso"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-031",
+      "query": "How to do Side Bends?",
+      "query_type": "single_howto",
+      "muscle_group": "core",
+      "expected_exercise": "Side Bends",
+      "expected_primary_muscles": [
+        "Obliques",
+        "Abdominals"
+      ],
+      "expected_keywords_in_answer": [
+        "side",
+        "bend",
+        "obliques",
+        "waist",
+        "torso"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-032",
+      "query": "Tell me about Reverse Crunch",
+      "query_type": "single_explain",
+      "muscle_group": "core",
+      "expected_exercise": "Reverse Crunch",
+      "expected_primary_muscles": [
+        "Abdominals"
+      ],
+      "expected_keywords_in_answer": [
+        "reverse crunch",
+        "knee",
+        "chest",
+        "abdominals",
+        "seat"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-033",
+      "query": "List core exercises",
+      "query_type": "list_query",
+      "muscle_group": "core",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "abdominals",
+        "obliques"
+      ],
+      "expected_keywords_in_answer": [
+        "crunch",
+        "oblique",
+        "ab",
+        "core",
+        "stomach"
+      ],
+      "expected_min_results": 3
+    },
+    {
+      "id": "EVL-034",
+      "query": "How do I do a Leg Extension?",
+      "query_type": "single_howto",
+      "muscle_group": "legs",
+      "expected_exercise": "Leg Extension",
+      "expected_primary_muscles": [
+        "Quadriceps"
+      ],
+      "expected_keywords_in_answer": [
+        "quadriceps",
+        "leg",
+        "extension",
+        "knee",
+        "horizontal"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-035",
+      "query": "What muscles does a Leg Press work?",
+      "query_type": "muscle_question",
+      "muscle_group": "legs",
+      "expected_exercise": "Leg Press",
+      "expected_primary_muscles": [
+        "Quadriceps",
+        "Hamstrings",
+        "Gluteals",
+        "Gastrocnemius",
+        "Soleus"
+      ],
+      "expected_keywords_in_answer": [
+        "quadriceps",
+        "hamstrings",
+        "glute",
+        "calf",
+        "entire leg"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-036",
+      "query": "Explain Standing Leg Curl",
+      "query_type": "single_explain",
+      "muscle_group": "legs",
+      "expected_exercise": "Standing Leg Curl",
+      "expected_primary_muscles": [
+        "Hamstrings",
+        "Gastrocnemius"
+      ],
+      "expected_keywords_in_answer": [
+        "hamstrings",
+        "calf",
+        "knee",
+        "backward",
+        "roller pads"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-037",
+      "query": "How to do a Calf Raise?",
+      "query_type": "single_howto",
+      "muscle_group": "legs",
+      "expected_exercise": "Calf Raise",
+      "expected_primary_muscles": [
+        "Gastrocnemius",
+        "Soleus"
+      ],
+      "expected_keywords_in_answer": [
+        "calf",
+        "gastrocnemius",
+        "soleus",
+        "ankle",
+        "foot plates"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-038",
+      "query": "What is a Glute Kick?",
+      "query_type": "single_what",
+      "muscle_group": "legs",
+      "expected_exercise": "Glute Kick",
+      "expected_primary_muscles": [
+        "Gluteus Maximus",
+        "Hamstrings"
+      ],
+      "expected_keywords_in_answer": [
+        "glute",
+        "gluteus maximus",
+        "hamstrings",
+        "ankle strap",
+        "backward"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-039",
+      "query": "What is Hip Adduction?",
+      "query_type": "single_what",
+      "muscle_group": "legs",
+      "expected_exercise": "Hip Adduction",
+      "expected_primary_muscles": [
+        "Adductors"
+      ],
+      "expected_keywords_in_answer": [
+        "adductors",
+        "thigh",
+        "ankle strap",
+        "inside"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-040",
+      "query": "What is Hip Abduction?",
+      "query_type": "single_what",
+      "muscle_group": "legs",
+      "expected_exercise": "Hip Abduction",
+      "expected_primary_muscles": [
+        "Abductors"
+      ],
+      "expected_keywords_in_answer": [
+        "abductors",
+        "thigh",
+        "ankle strap",
+        "outside",
+        "outward"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-041",
+      "query": "Show me leg exercises",
+      "query_type": "list_query",
+      "muscle_group": "legs",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "quadriceps",
+        "hamstrings",
+        "glutes",
+        "calf"
+      ],
+      "expected_keywords_in_answer": [
+        "leg",
+        "quad",
+        "hamstring",
+        "glute",
+        "calf",
+        "extension"
+      ],
+      "expected_min_results": 4
+    },
+    {
+      "id": "EVL-042",
+      "query": "Give me a workout for chest and shoulders",
+      "query_type": "multi_muscle_query",
+      "muscle_group": "multiple",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "chest",
+        "pectorals",
+        "deltoids",
+        "shoulder"
+      ],
+      "expected_keywords_in_answer": [
+        "chest",
+        "shoulder",
+        "press",
+        "deltoid"
+      ],
+      "expected_min_results": 2
+    },
+    {
+      "id": "EVL-043",
+      "query": "Give me a workout for chest back and shoulder",
+      "query_type": "multi_muscle_query",
+      "muscle_group": "multiple",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "chest",
+        "back",
+        "shoulder"
+      ],
+      "expected_keywords_in_answer": [
+        "chest",
+        "back",
+        "shoulder",
+        "press",
+        "row",
+        "deltoid"
+      ],
+      "expected_min_results": 3
+    },
+    {
+      "id": "EVL-044",
+      "query": "Show me bicep and tricep exercises",
+      "query_type": "multi_muscle_query",
+      "muscle_group": "multiple",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "biceps",
+        "triceps"
+      ],
+      "expected_keywords_in_answer": [
+        "biceps",
+        "triceps",
+        "curl",
+        "extension",
+        "arm"
+      ],
+      "expected_min_results": 2
+    },
+    {
+      "id": "EVL-045",
+      "query": "Give me exercises for legs back and core",
+      "query_type": "multi_muscle_query",
+      "muscle_group": "multiple",
+      "expected_exercise": null,
+      "expected_primary_muscles": [
+        "legs",
+        "back",
+        "core"
+      ],
+      "expected_keywords_in_answer": [
+        "leg",
+        "back",
+        "core",
+        "abdominal",
+        "row",
+        "lat"
+      ],
+      "expected_min_results": 3
+    },
+    {
+      "id": "EVL-046",
+      "query": "How to do a Golf Swing exercise?",
+      "query_type": "single_howto",
+      "muscle_group": "sports",
+      "expected_exercise": "Golf Swing",
+      "expected_primary_muscles": [],
+      "expected_keywords_in_answer": [
+        "golf",
+        "swing",
+        "functional training arm",
+        "stance"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-047",
+      "query": "How to do a Tennis Swing exercise?",
+      "query_type": "single_howto",
+      "muscle_group": "sports",
+      "expected_exercise": "Tennis Swing",
+      "expected_primary_muscles": [],
+      "expected_keywords_in_answer": [
+        "tennis",
+        "swing",
+        "backhand",
+        "forehand",
+        "racket"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-048",
+      "query": "What is the Baseball Pitch exercise?",
+      "query_type": "single_what",
+      "muscle_group": "sports",
+      "expected_exercise": "Baseball Pitch",
+      "expected_primary_muscles": [],
+      "expected_keywords_in_answer": [
+        "baseball",
+        "pitch",
+        "throw",
+        "mid pulley"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-049",
+      "query": "What are the variations for the Bench Press?",
+      "query_type": "variation_question",
+      "muscle_group": "chest",
+      "expected_exercise": "Bench Press",
+      "expected_primary_muscles": [
+        "chest"
+      ],
+      "expected_keywords_in_answer": [
+        "underhand",
+        "neutral grip",
+        "variation",
+        "grip"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-050",
+      "query": "What equipment do I need for Lat Pull Down?",
+      "query_type": "equipment_question",
+      "muscle_group": "back",
+      "expected_exercise": "Lat Pull Down",
+      "expected_primary_muscles": [
+        "back"
+      ],
+      "expected_keywords_in_answer": [
+        "lat bar",
+        "high pulley",
+        "knee pads"
+      ],
+      "expected_min_results": 1
+    },
+    {
+      "id": "EVL-051",
+      "query": "xyzabc some fake workout that doesnt exist",
+      "query_type": "negative_test",
+      "muscle_group": "none",
+      "expected_exercise": null,
+      "expected_primary_muscles": [],
+      "expected_keywords_in_answer": [
+        "no",
+        "not found",
+        "no matching"
+      ],
+      "expected_min_results": 0
+    }
+  ]
+}

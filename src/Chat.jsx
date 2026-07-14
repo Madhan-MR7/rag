@@ -1,31 +1,15 @@
-import { useEffect, useState } from "react";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  orderBy,
-  serverTimestamp,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
-
-import { storage } from "./firebase/config";
-
+import { useEffect, useState, useRef } from "react";
 import { signOut } from "firebase/auth";
-import { db, auth } from "./firebase/config";
-
+import { auth } from "./firebase/config";
 import Sidebar from "./Sidebar";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
-
+import WorkoutPlannerPage from "./WorkoutPlannerPage";
 import "./styles/Chat.css";
+
+// Firebase is kept ONLY for authentication (signOut / onAuthStateChanged).
+// All chat/message/image data now lives in MongoDB via the FastAPI backend.
+const BACKEND = "http://localhost:8000";
 
 function Chat() {
   const [message, setMessage] = useState("");
@@ -33,103 +17,97 @@ function Chat() {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [showSidebar, setShowSidebar] = useState(true);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  // Land on the Workout Planner by default — that's the primary reason
+  // someone opens the app. "Chat" is for follow-up exercise questions,
+  // one click away via the topbar tab.
+  const [activeView, setActiveView] = useState("planner"); // "chat" | "planner"
+
+  // Track whether the current chat is brand-new so we can rename it
+  // after the first message even when React state hasn't updated yet.
+  const isNewChatRef = useRef(false);
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((user) => {
-      if (user) {
-        loadChats(user.uid);
-      }
+      if (user) loadChats(user.uid);
     });
-
     return () => unsub();
   }, []);
 
-  // 🔥 FIX 1: ORDERED CHATS (important for reload)
+  // ── LOAD CHATS ──────────────────────────────────────────────────────────
   const loadChats = async (uid) => {
-    const q = query(
-      collection(db, "users", uid, "chats"),
-      orderBy("createdAt", "desc")
-    );
-
-    const snap = await getDocs(q);
-
-    const data = snap.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
-
+    const res = await fetch(`${BACKEND}/chats/${uid}`);
+    const data = await res.json();
     setChats(data);
-
-    if (data.length > 0) {
-      openChat(data[0].id, uid);
-    }
+    // Just preload the most recent chat's messages in the background —
+    // don't switch views. The user should land on the Workout Planner
+    // (activeView's default) after login, not get bounced into Chat.
+    if (data.length > 0) openChat(data[0].id, false);
   };
 
-  // CREATE CHAT
+  // ── CREATE CHAT ──────────────────────────────────────────────────────────
   const createChat = async () => {
     const uid = auth.currentUser.uid;
-
-    const docRef = await addDoc(
-      collection(db, "users", uid, "chats"),
-      {
-        title: "New Chat",
-        createdAt: serverTimestamp(),
-      }
-    );
-
-    const newChat = {
-      id: docRef.id,
-      title: "New Chat",
-    };
+    const res = await fetch(`${BACKEND}/chats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: uid, title: "New Chat" }),
+    });
+    const newChat = await res.json();
 
     setChats((prev) => [newChat, ...prev]);
-    openChat(docRef.id, uid);
+    openChat(newChat.id);
+    setActiveView("chat");
   };
 
-  // OPEN CHAT
-  const openChat = async (chatId, uid = auth.currentUser?.uid) => {
-    if (!chatId || !uid) return;
+  // ── OPEN CHAT ────────────────────────────────────────────────────────────
+  // `switchView` defaults to true for real user actions (clicking a chat in
+  // the sidebar, creating a new chat). Pass false for the silent preload
+  // that happens right after login so it doesn't hijack the current view.
+  const openChat = async (chatId, switchView = true) => {
+    if (!chatId) return;
 
     setCurrentChatId(chatId);
     setMessages([]);
+    isNewChatRef.current = false;
+    if (switchView) setActiveView("chat");
 
-    const q = query(
-      collection(db, "users", uid, "chats", chatId, "messages"),
-      orderBy("createdAt")
-    );
+    const res = await fetch(`${BACKEND}/messages/${chatId}`);
+    const data = await res.json();
 
-    const snap = await getDocs(q);
+    // Messages are persisted with only the raw `exercise` object — the
+    // `images` array (absolute /image/{id} URLs) is built here on read,
+    // same way it's built right after a live /chat response.
+    const hydrated = data.map((m) => {
+      if (m.exercise && Array.isArray(m.exercise.image_urls)) {
+        return {
+          ...m,
+          images: m.exercise.image_urls.map((u) => `${BACKEND}${u}`),
+        };
+      }
+      return m;
+    });
 
-    setMessages(snap.docs.map((d) => d.data()));
+    setMessages(hydrated);
   };
 
-  // 🔥 FIX 2: AUTO NAME CHAT BASED ON FIRST USER MESSAGE
+  // ── RENAME CHAT ──────────────────────────────────────────────────────────
   const updateChatTitle = async (chatId, text) => {
-    const uid = auth.currentUser.uid;
+    const shortTitle = text.length > 25 ? text.substring(0, 25) + "..." : text;
 
-    const shortTitle =
-      text.length > 25 ? text.substring(0, 25) + "..." : text;
-
-    await updateDoc(
-      doc(db, "users", uid, "chats", chatId),
-      {
-        title: shortTitle,
-      }
-    );
+    await fetch(`${BACKEND}/chats/${chatId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: shortTitle }),
+    });
 
     setChats((prev) =>
-      prev.map((c) =>
-        c.id === chatId ? { ...c, title: shortTitle } : c
-      )
+      prev.map((c) => (c.id === chatId ? { ...c, title: shortTitle } : c))
     );
   };
 
-  // DELETE CHAT
+  // ── DELETE CHAT ──────────────────────────────────────────────────────────
   const deleteChat = async (chatId) => {
-    const uid = auth.currentUser.uid;
-
-    await deleteDoc(doc(db, "users", uid, "chats", chatId));
+    await fetch(`${BACKEND}/chats/${chatId}`, { method: "DELETE" });
 
     const updated = chats.filter((c) => c.id !== chatId);
     setChats(updated);
@@ -137,183 +115,196 @@ function Chat() {
     if (currentChatId === chatId) {
       setMessages([]);
       setCurrentChatId(null);
-
-      if (updated.length > 0) {
-        openChat(updated[0].id, uid);
-      }
+      if (updated.length > 0) openChat(updated[0].id, false);
     }
   };
 
-  // SEND MESSAGE
+  // ── SEND MESSAGE ─────────────────────────────────────────────────────────
   const sendMessage = async () => {
     const uid = auth.currentUser.uid;
 
+    if (!message.trim()) return;
+
     let chatId = currentChatId;
 
-
-    if (!message.trim() && selectedFiles.length === 0) return;
-
-    // create chat if none
+    // Create a chat if none is active
     if (!chatId) {
-      const docRef = await addDoc(
-        collection(db, "users", uid, "chats"),
-        {
-          title: message, // initial temp title
-          createdAt: serverTimestamp(),
-        }
-      );
+      const res = await fetch(`${BACKEND}/chats`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: uid, title: "New Chat" }),
+      });
+      const newChat = await res.json();
 
-      chatId = docRef.id;
+      chatId = newChat.id;
+      isNewChatRef.current = true;
+
       setCurrentChatId(chatId);
-
-      const newChat = { id: chatId, title: message };
       setChats((prev) => [newChat, ...prev]);
     }
-    if (selectedFiles.length > 0) {
-      for (const file of selectedFiles) {
 
-        const fileMsg = {
-          role: "user",
-          isFile: true,
-          fileName: file.name,
-          text: `📎 ${file.name}`,
-        };
+    // ── Save user text message ────────────────────────────────────────────
+    const currentText = message.trim();
 
-        setMessages((prev) => [...prev, fileMsg]);
-
-        await addDoc(
-          collection(
-            db,
-            "users",
-            uid,
-            "chats",
-            chatId,
-            "messages"
-          ),
-          {
-            ...fileMsg,
-            createdAt: serverTimestamp(),
-          }
-        );
-      }
-
-      setSelectedFiles([]);
-    }
-    const currentText = message;
-
-    if (message.trim()) {
-      const userMsg = {
-        role: "user",
-        text: message,
-      };
-
-      setMessages((prev) => [...prev, userMsg]);
-
-      await addDoc(
-        collection(
-          db,
-          "users",
-          uid,
-          "chats",
-          chatId,
-          "messages"
-        ),
-        {
-          ...userMsg,
-          createdAt: serverTimestamp(),
-        }
-      );
-    }
+    const userMsg = { role: "user", text: currentText };
+    setMessages((prev) => [...prev, userMsg]);
+    // Note: /chat below also persists the user's query message server-side,
+    // so we don't double-save it here — this just updates the UI instantly.
 
     setMessage("");
 
-    // 🔥 AUTO UPDATE CHAT TITLE ON FIRST MESSAGE ONLY
-    const chat = chats.find((c) => c.id === chatId);
-
-    if (chat?.title === "New Chat") {
+    if (isNewChatRef.current) {
+      isNewChatRef.current = false;
       updateChatTitle(chatId, currentText);
     }
 
-    const botMsg = {
-      role: "assistant",
-      text: "RAG backend will generate this later 🚀",
-    };
+    // ── Call backend ────────────────────────────────────────────────────
+    try {
+      const response = await fetch(`${BACKEND}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: currentText, userId: uid, chatId }),
+      });
 
-    setMessages((prev) => [...prev, botMsg]);
+      const data = await response.json();
 
-    await addDoc(
-      collection(db, "users", uid, "chats", chatId, "messages"),
-      {
-        ...botMsg,
-        createdAt: serverTimestamp(),
+      // --- Multi-exercise response (list / multi-muscle queries) ---
+      if (data.exercises && Array.isArray(data.exercises) && data.exercises.length > 0) {
+        const msgs = data.exercises.map((ex, i) => ({
+          role: "assistant",
+          exercise: ex,
+          exerciseIndex: i,
+          images: (ex.image_urls || []).map((u) => `${BACKEND}${u}`),
+        }));
+        setMessages((prev) => [...prev, ...msgs]);
+
+        // --- Single exercise response ---
+      } else if (data.exercise && data.exercise.exercise_name) {
+        const botMsg = {
+          role: "assistant",
+          exercise: data.exercise,
+          images: (data.exercise.image_urls || []).map((u) => `${BACKEND}${u}`),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+
+        // --- Plain text answer (errors, "no exercise found", etc.) ---
+      } else {
+        const botMsg = {
+          role: "assistant",
+          text: data.answer || "No exercise found for your query.",
+        };
+        setMessages((prev) => [...prev, botMsg]);
       }
-    );
+      // Note: /chat already persisted the assistant message(s) to MongoDB,
+      // so no extra save call is needed here — just updating local UI state.
+
+    } catch (error) {
+      console.error("Backend error:", error);
+
+      const errorMsg = {
+        role: "assistant",
+        text: "⚠️ Backend error. Make sure the FastAPI server is running on port 8000.",
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    }
   };
 
+  // ── HANDLERS ─────────────────────────────────────────────────────────────
   const handleLogout = async () => {
     await signOut(auth);
     window.location.href = "/";
   };
 
-  const handleFileUpload = (files) => {
-    if (!files.length) return;
-
-    setSelectedFiles(Array.from(files));
-  };
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  // Topbar now lives OUTSIDE .chat-container, as a full-width bar above
+  // everything else. This is the key fix: previously it lived inside
+  // .chat-main, so its available width — and therefore the "center" of
+  // the tab pill — shrank whenever the 280px sidebar was mounted. Now the
+  // topbar always spans the entire viewport width, so the tabs are always
+  // centered on the real page, whether the sidebar is open, closed, or
+  // not rendered at all (planner view).
   return (
-    <div className="chat-container">
+    <div className="app-shell">
+      <div className="topbar">
+        <div className="topbar-side">
+          {activeView === "chat" && (
+            <button
+              className="sidebar-toggle"
+              onClick={() => setShowSidebar(!showSidebar)}
+            >
+              ☰
+            </button>
+          )}
+        </div>
 
-      <Sidebar
-        chats={chats}
-        createChat={createChat}
-        openChat={openChat}
-        deleteChat={deleteChat}
-        activeChatId={currentChatId}
-        showSidebar={showSidebar}
-      />
+        <div className="topbar-center">
+          <div className="view-tabs">
+            <button
+              className={`view-tab ${activeView === "planner" ? "view-tab-active" : ""}`}
+              onClick={() => setActiveView("planner")}
+            >
+              Workout Planner
+            </button>
+            <button
+              className={`view-tab ${activeView === "chat" ? "view-tab-active" : ""}`}
+              onClick={() => setActiveView("chat")}
+            >
+              Chat
+            </button>
+          </div>
+        </div>
 
-      <div className="chat-main">
-
-        <div className="topbar">
-          <button
-            className="sidebar-toggle"
-            onClick={() => setShowSidebar(!showSidebar)}
-          >
-            ☰
-          </button>
-          <div className="title">FitGPT</div>
-
+        <div className="topbar-side topbar-side-right">
           <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>
         </div>
+      </div>
 
-        <div className="messages">
-          {messages.length === 0 && (
-            <div className="empty">Start a conversation...</div>
+      <div className="chat-container">
+        {activeView === "chat" && (
+          <Sidebar
+            chats={chats}
+            createChat={createChat}
+            openChat={openChat}
+            deleteChat={deleteChat}
+            activeChatId={currentChatId}
+            showSidebar={showSidebar}
+          />
+        )}
+
+        <div className="chat-main">
+          {activeView === "chat" ? (
+            <>
+              <div className="messages">
+                {messages.length === 0 && (
+                  <div className="empty">Ask about any exercise — form, sets, muscles worked...</div>
+                )}
+                {messages.map((m, i) => (
+                  <MessageBubble
+                    key={i}
+                    role={m.role}
+                    text={m.text}
+                    exercise={m.exercise}
+                    exerciseIndex={m.exerciseIndex}
+                    fileUrl={m.fileUrl}
+                    fileName={m.fileName}
+                    isFile={m.isFile}
+                    images={m.images || []}
+                  />
+                ))}
+              </div>
+
+              <ChatInput
+                message={message}
+                setMessage={setMessage}
+                sendMessage={sendMessage}
+              />
+            </>
+          ) : (
+            <WorkoutPlannerPage userId={auth.currentUser.uid} backendUrl={BACKEND} />
           )}
-
-          {messages.map((m, i) => (
-            <MessageBubble
-              key={i}
-              role={m.role}
-              text={m.text}
-              fileUrl={m.fileUrl}
-              fileName={m.fileName}
-              isFile={m.isFile}
-            />
-
-          ))}
         </div>
-
-        <ChatInput
-          message={message}
-          setMessage={setMessage}
-          sendMessage={sendMessage}
-          handleFileUpload={handleFileUpload}
-          selectedFiles={selectedFiles}
-          setSelectedFiles={setSelectedFiles}
-        />
       </div>
     </div>
   );
